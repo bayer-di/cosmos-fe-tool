@@ -32,7 +32,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cosmos-fe/tool.git"
+    "url": "git+https://github.com/bayer-di/cosmos-fe-tool.git"
   },
   "scripts": {
     "dev": "rollup -c -w",
