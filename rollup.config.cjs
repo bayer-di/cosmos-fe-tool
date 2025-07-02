@@ -17,8 +17,8 @@ module.exports = {
       file: 'dist/index.esm.js',
       format: 'esm',
       sourcemap: true,
-      exports: 'named'
-      // 不加 terser
+      exports: 'named',
+      plugins: [terser()]
     }
   ],
   external: ['antd'],
