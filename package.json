@@ -1,6 +1,6 @@
 {
   "name": "@cosmosfe/tool",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Cosmos 前端通用工具函数库",
   "keywords": [
     "cosmos",
