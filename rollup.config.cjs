@@ -21,7 +21,7 @@ module.exports = {
       plugins: [terser()]
     }
   ],
-  external: ['antd'],
+  external: ['antd', 'axios', 'crypto'],
   plugins: [
     nodeResolve({ preferBuiltins: true }),
     commonjs(),

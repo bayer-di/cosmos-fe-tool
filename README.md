@@ -23,16 +23,21 @@ yarn add @cosmosfe/tool
 ### 完整导入
 
 ```typescript
-import { asyncFetch, filterEmptyValue, formatDuringWithoutSec, remUtils } from '@cosmosfe/tool'
+import {
+  asyncFetch,
+  filterEmptyValue,
+  formatDuringWithoutSec,
+  remUtils,
+} from '@cosmosfe/tool';
 ```
 
 ### 按需导入
 
 ```typescript
-import { asyncFetch } from '@cosmosfe/tool'
-import { filterEmptyValue } from '@cosmosfe/tool'
-import { formatDuringWithoutSec } from '@cosmosfe/tool'
-import { remUtils } from '@cosmosfe/tool'
+import { asyncFetch } from '@cosmosfe/tool';
+import { filterEmptyValue } from '@cosmosfe/tool';
+import { formatDuringWithoutSec } from '@cosmosfe/tool';
+import { remUtils } from '@cosmosfe/tool';
 ```
 
 ## API 文档
@@ -42,17 +47,17 @@ import { remUtils } from '@cosmosfe/tool'
 异步请求工具函数，提供统一的错误处理和超时控制。
 
 ```typescript
-import { asyncFetch } from '@cosmosfe/tool'
+import { asyncFetch } from '@cosmosfe/tool';
 
 // 基本使用
-const data = await asyncFetch('/api/users')
+const data = await asyncFetch('/api/users');
 
 // 带配置的使用
 const data = await asyncFetch('/api/users', {
   method: 'POST',
   body: JSON.stringify({ name: 'John' }),
-  timeout: 5000
-})
+  timeout: 5000,
+});
 ```
 
 ### filterEmptyValue
@@ -60,17 +65,17 @@ const data = await asyncFetch('/api/users', {
 过滤对象中的空值（null、undefined、空字符串等）。
 
 ```typescript
-import { filterEmptyValue } from '@cosmosfe/tool'
+import { filterEmptyValue } from '@cosmosfe/tool';
 
 const obj = {
   name: 'John',
   age: 30,
   email: '',
   address: null,
-  phone: undefined
-}
+  phone: undefined,
+};
 
-const filtered = filterEmptyValue(obj)
+const filtered = filterEmptyValue(obj);
 // 结果: { name: 'John', age: 30 }
 ```
 
@@ -79,9 +84,9 @@ const filtered = filterEmptyValue(obj)
 格式化时间间隔，不显示秒数。
 
 ```typescript
-import { formatDuringWithoutSec } from '@cosmosfe/tool'
+import { formatDuringWithoutSec } from '@cosmosfe/tool';
 
-const duration = formatDuringWithoutSec(3661000) // 1小时1分钟1秒
+const duration = formatDuringWithoutSec(3661000); // 1小时1分钟1秒
 // 结果: "1小时1分钟"
 ```
 
@@ -90,13 +95,13 @@ const duration = formatDuringWithoutSec(3661000) // 1小时1分钟1秒
 rem 相关工具函数集合。
 
 ```typescript
-import { remUtils } from '@cosmosfe/tool'
+import { remUtils } from '@cosmosfe/tool';
 
 // 转换 px 到 rem
-const rem = remUtils.pxToRem(16) // 1rem
+const rem = remUtils.pxToRem(16); // 1rem
 
 // 转换 rem 到 px
-const px = remUtils.remToPx(1) // 16px
+const px = remUtils.remToPx(1); // 16px
 ```
 
 ### toZhNumber
@@ -104,10 +109,38 @@ const px = remUtils.remToPx(1) // 16px
 将数字转换为中文数字。
 
 ```typescript
-import { toZhNumber } from '@cosmosfe/tool'
+import { toZhNumber } from '@cosmosfe/tool';
 
-const zhNumber = toZhNumber(1234) // "一千二百三十四"
+const zhNumber = toZhNumber(1234); // "一千二百三十四"
 ```
+
+### createWithValid
+
+带验签功能的 axios 请求工具，支持多种签名算法和时间戳验证。
+
+```typescript
+import { createWithValid, createValidatedRequest } from '@cosmosfe/tool';
+
+// 创建带验签的 axios 实例
+const api = createWithValid(
+  { baseURL: 'https://api.example.com' },
+  {
+    secretKey: 'your-secret-key',
+    algorithm: 'md5',
+  },
+);
+
+// 使用便捷的请求函数
+const request = createValidatedRequest('https://api.example.com', {
+  secretKey: 'your-secret-key',
+  algorithm: 'sha256',
+});
+
+// 自动添加时间戳和签名
+const response = await request.post('/users', { name: '张三' });
+```
+
+详细文档请查看 [验签功能文档](src/rest/README.md)。
 
 ## 开发
 
@@ -178,4 +211,4 @@ yarn release
 
 ## 许可证
 
-MIT License 
+MIT License

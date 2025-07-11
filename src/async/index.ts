@@ -1,3 +1,5 @@
+import { parseMessage } from "../rest/error";
+
 /**
  * 异步请求工具
  */
@@ -48,7 +50,7 @@ const asyncFetch = async (
     return true
   } catch (e: any) {
     const errorMessage = typeof e === 'string' ? e : e?.message?.replace('Error: ', '') || '出错了'
-    onError?.(errorMessage)
+    onError?.(parseMessage(errorMessage))
   } finally {
     messageLoadingDestroyer?.()
     onFinish?.()
