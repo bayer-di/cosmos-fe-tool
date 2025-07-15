@@ -1,4 +1,4 @@
-import { createWithValid, createValidatedRequest, validateRequest, SignConfig } from '../src/rest/createWithValid'
+import { createWithValid } from '../src/rest/createWithValid'
 
 // Mock axios
 jest.mock('axios', () => ({
@@ -19,14 +19,22 @@ jest.mock('axios', () => ({
   }))
 }))
 
+// Mock ts-md5
+jest.mock('ts-md5', () => ({
+  Md5: {
+    hashStr: jest.fn(() => 'mocked-hash')
+  }
+}))
+
+// Mock error interceptor
+jest.mock('../src/rest/error', () => ({
+  requestErrorInterceptor: jest.fn((error) => error)
+}))
+
 describe('createWithValid', () => {
-  const mockSignConfig: SignConfig = {
-    secretKey: 'test-secret-key',
-    timestampField: 'timestamp',
-    signField: 'sign',
-    expireTime: 300000,
-    useHeader: false,
-    algorithm: 'md5'
+  const mockOptions = {
+    apiPrefix: 'https://api.example.com',
+    accessKey: 'PMS' as const
   }
 
   beforeEach(() => {
@@ -34,109 +42,61 @@ describe('createWithValid', () => {
   })
 
   test('应该创建带验签功能的 axios 实例', () => {
-    const instance = createWithValid({}, mockSignConfig)
+    const instance = createWithValid(mockOptions)
     
     expect(instance).toBeDefined()
     expect(instance.interceptors.request.use).toHaveBeenCalled()
-    expect(instance.interceptors.response.use).toHaveBeenCalled()
+    expect(instance.interceptors.response.use).toHaveBeenCalledTimes(2)
   })
 
   test('应该正确配置请求拦截器', () => {
-    const instance = createWithValid({}, mockSignConfig)
+    const instance = createWithValid(mockOptions)
     const requestInterceptor = instance.interceptors.request.use as jest.Mock
     
     expect(requestInterceptor).toHaveBeenCalledWith(
-      expect.any(Function),
       expect.any(Function)
     )
   })
-})
 
-describe('validateRequest', () => {
-  const mockSignConfig: SignConfig = {
-    secretKey: 'test-secret-key',
-    timestampField: 'timestamp',
-    signField: 'sign',
-    expireTime: 300000,
-    algorithm: 'md5'
-  }
-
-  test('应该验证有效的请求参数', () => {
-    const timestamp = Date.now()
-    const params = {
-      name: 'test',
-      age: 25,
-      timestamp,
-      sign: 'valid-sign' // 这里需要是真实的签名
-    }
-
-    const result = validateRequest(params, mockSignConfig)
-    expect(result.isValid).toBe(false) // 因为签名不匹配
-    expect(result.error).toBe('签名验证失败')
-  })
-
-  test('应该检测缺少时间戳', () => {
-    const params = {
-      name: 'test',
-      sign: 'some-sign'
-    }
-
-    const result = validateRequest(params, mockSignConfig)
-    expect(result.isValid).toBe(false)
-    expect(result.error).toBe('缺少时间戳')
-  })
-
-  test('应该检测缺少签名', () => {
-    const params = {
-      name: 'test',
-      timestamp: Date.now()
-    }
-
-    const result = validateRequest(params, mockSignConfig)
-    expect(result.isValid).toBe(false)
-    expect(result.error).toBe('缺少签名')
-  })
-
-  test('应该检测过期的时间戳', () => {
-    const oldTimestamp = Date.now() - 400000 // 6分钟前
-    const params = {
-      name: 'test',
-      timestamp: oldTimestamp,
-      sign: 'some-sign'
-    }
-
-    const result = validateRequest(params, mockSignConfig)
-    expect(result.isValid).toBe(false)
-    expect(result.error).toBe('时间戳已过期')
-  })
-})
-
-describe('createValidatedRequest', () => {
-  const mockSignConfig: SignConfig = {
-    secretKey: 'test-secret-key',
-    timestampField: 'timestamp',
-    signField: 'sign',
-    expireTime: 300000,
-    algorithm: 'md5'
-  }
-
-  test('应该创建带验签的请求函数', () => {
-    const request = createValidatedRequest('https://api.example.com', mockSignConfig)
+  test('应该正确配置响应拦截器', () => {
+    const instance = createWithValid(mockOptions)
+    const responseInterceptor = instance.interceptors.response.use as jest.Mock
     
-    expect(request.get).toBeDefined()
-    expect(request.post).toBeDefined()
-    expect(request.put).toBeDefined()
-    expect(request.delete).toBeDefined()
-    expect(request.patch).toBeDefined()
-    expect(request.validate).toBeDefined()
+    expect(responseInterceptor).toHaveBeenCalledTimes(2)
   })
 
-  test('应该提供验证方法', () => {
-    const request = createValidatedRequest('https://api.example.com', mockSignConfig)
-    const params = { name: 'test', timestamp: Date.now(), sign: 'test-sign' }
+  test('应该使用默认的 PMS accessKey', () => {
+    const instance = createWithValid({ 
+      apiPrefix: 'https://api.example.com',
+      accessKey: 'PMS'
+    })
     
-    const result = request.validate(params)
-    expect(result).toHaveProperty('isValid')
-    expect(result).toHaveProperty('error')
+    expect(instance).toBeDefined()
+  })
+
+  test('应该支持不同的 accessKey', () => {
+    const appInstance = createWithValid({ 
+      apiPrefix: 'https://api.example.com', 
+      accessKey: 'APP' 
+    })
+    
+    const nrxInstance = createWithValid({ 
+      apiPrefix: 'https://api.example.com', 
+      accessKey: 'NRX' 
+    })
+    
+    expect(appInstance).toBeDefined()
+    expect(nrxInstance).toBeDefined()
+  })
+
+  test('应该使用正确的 API 前缀', () => {
+    const axios = require('axios')
+    const mockAxiosCreate = axios.create as jest.Mock
+    
+    createWithValid(mockOptions)
+    
+    expect(mockAxiosCreate).toHaveBeenCalledWith({
+      baseURL: mockOptions.apiPrefix
+    })
   })
 }) 

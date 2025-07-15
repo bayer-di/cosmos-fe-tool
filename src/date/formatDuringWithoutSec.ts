@@ -3,19 +3,13 @@
  * @param t 毫秒
  * @returns 格式化后的时间字符串
  */
-const formatDuringWithoutSec = (t: number): string => {
+const formatDuringWithoutSec = (t: number): { d: number; h: number; m: number } => {
+  if (t <= 0) return { d: 0, h: 0, m: 0 }
   const hour = 1000 * 60 * 60
-  const d = parseInt(`${t / (hour * 24)}`)
-  const h = parseInt(`${(t % (hour * 24)) / hour}`)
-  const m = parseInt(`${(t % hour) / (1000 * 60)}`)
-  // const s = parseInt(`${(t % (1000 * 60)) / 1000}`)
-
-  let text = ''
-  if (d) text += `${d}天`
-  if (h) text += `${h}小时`
-  if (m) text += `${m}分钟`
-  // if (s) text += `${s}秒`
-  return text || '-'
+  const d = Math.floor(t / (hour * 24))
+  const h = Math.floor((t % (hour * 24)) / hour)
+  const m = Math.floor((t % hour) / (1000 * 60))
+  return { d, h, m }
 }
 
 export default formatDuringWithoutSec 

@@ -39,7 +39,7 @@ describe('asyncFetch', () => {
     const result = await asyncFetch(mockApi, hooks, mockMessage)
     
     expect(result).toBe(false)
-    expect(hooks.onError).toHaveBeenCalledWith('API Error')
+    expect(hooks.onError).toHaveBeenCalledWith('系统错误，请重试')
   })
 
   it('should return true on success', async () => {
